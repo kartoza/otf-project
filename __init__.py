@@ -4,7 +4,8 @@
 """
 
 
+# noinspection PyDocstring,PyPep8Naming
 def serverClassFactory(serverIface):
-    from HelloServer import HelloServerServer
-    return HelloServerServer(serverIface)
+    from otf_project import OtfProjectServer
+    return OtfProjectServer(serverIface)
 
