@@ -1,36 +1,24 @@
 [general]
-name=HelloServer
+name=OTF-Project
 qgisMinimumVersion=2.5
 qgisMaximumVersion=2.99
-description=This is a test plugin for the QGIS MapServer
-version=version 1.1
-author=Alessandro Pasotti (ItOpen)
-email=apasotti@gmail.com
+about=To create a QGIS Project OTF
+description=To create a QGIS Project OTF
+version=1.0
+author=Etienne Trimaille (Kartoza)
+email=etienne@kartoza.com
 ; if True it's a server plugin
 server=True
 
 changelog=
 
 
-tags=hello world, test, server
+tags=qgis project, server
 
-tracker=https://github.com/elpaso/qgis-helloserver
-homepage=https://github.com/elpaso/qgis-helloserver
-repository=https://github.com/elpaso/qgis-helloserver
+tracker=https://github.com/Gustry/otf-project
+homepage=https://github.com/Gustry/otf-project
+repository=https://github.com/Gustry/otf-project
 
 category=server
 
 experimental=True
-
-about=This is a test plugin *** DO NOT USE IN PRODUCTION!!!  ***. It provides various
-    testing methods:
-    - SayHello: just prints "HelloServer", no other processings, it can be used
-      for speed testing with "ab"
-    - RemoteConsole: a single user, single session completely insecure remote
-      Python shell
-    - RemoteConsole: execute Python code through a console web application
-    - Watermark: adds a QGIS watermark to WMS images
-
-
-; change icon...
-icon=icons/icon.png
