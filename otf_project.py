@@ -17,11 +17,18 @@ class OtfProjectServer:
         import filters
         priority = 1
 
-        QgsMessageLog.logMessage("SUCCESS - HelloServer init", 'plugin', QgsMessageLog.INFO)
+        QgsMessageLog.logMessage(
+            'SUCCESS - OTF Project init', 'plugin', QgsMessageLog.INFO)
+
         for filter_name in filters.local_modules:
-            QgsLogger.debug("HelloServerServer - loading filter %s" % filter_name)
+            QgsLogger.debug('OTF Project - loading filter %s' % filter_name)
+
             try:
-                server_iface.registerFilter(getattr(filters, filter_name)(server_iface), priority * 100)
+                server_iface.registerFilter(
+                    getattr(filters, filter_name)(server_iface),
+                    priority * 100)
                 priority += 1
             except Exception, e:
-                QgsLogger.debug("HelloServerServer - Error loading filter %s : %s" % (filter_name, e))
+                QgsLogger.debug(
+                    'OTF Project - Error loading filter %s : %s'
+                    % (filter_name, e))

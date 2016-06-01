@@ -25,8 +25,8 @@ import inspect
 import os
 import glob
 
-modules = glob.glob(os.path.dirname(__file__)+"/*Filter.py")
-local_modules = [ os.path.basename(f)[:-3] for f in modules]
+modules = glob.glob(os.path.dirname(__file__) + '/*Filter.py')
+local_modules = [os.path.basename(f)[:-3] for f in modules]
 
 
 for loader, name, is_pkg in pkgutil.walk_packages(__path__):
