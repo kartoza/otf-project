@@ -30,10 +30,10 @@ from qgis.core import (
     QgsRasterLayer)
 
 
-class HelloFilter(QgsServerFilter):
+class CreateOrReadProjectFilter(QgsServerFilter):
 
     def __init__(self, server_iface):
-        super(HelloFilter, self).__init__(server_iface)
+        super(CreateOrReadProjectFilter, self).__init__(server_iface)
 
     # noinspection PyPep8Naming
     def requestReady(self):
