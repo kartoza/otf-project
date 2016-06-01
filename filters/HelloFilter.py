@@ -19,7 +19,8 @@
 """
 
 
-from os.path import splitext, exists, isfile
+import xml.etree.ElementTree as ET
+from os.path import splitext, exists, isfile, basename
 from qgis.server import QgsServerFilter
 from qgis.core import (
     QgsProject,
@@ -43,17 +44,17 @@ class HelloFilter(QgsServerFilter):
 
         if not map_file.endswith('qgs'):
 
-            basename, _ = splitext(map_file)
-            project = basename + '.qgs'
+            project = splitext(map_file)[0] + '.qgs'
+            file_name = splitext(basename(map_file))[0]
 
-            if True:
+            if not exists(project) and not isfile(project):
                 QgsMessageLog.logMessage('Setting up project to %s' % project)
                 QgsProject.instance().setFileName(project)
                 QgsMessageLog.logMessage(
                     'Project instance %s' % QgsProject.instance().fileName())
 
                 if map_file.endswith(('shp', 'geojson')):
-                    layer = QgsVectorLayer(map_file, 'layer', 'ogr')
+                    layer = QgsVectorLayer(map_file, file_name, 'ogr')
                 elif map_file.endswith(('asc', 'tiff', 'tif')):
                     layer = QgsRasterLayer(map_file, 'layer')
                 else:
@@ -70,6 +71,24 @@ class HelloFilter(QgsServerFilter):
                 if not exists(project) and not isfile(project):
                     QgsMessageLog.logMessage(QgsProject.instance().error())
                     return
+
+                # QGIS do not put the legend node because we are on a server.
+                # We need to add manually.
+                xml_string = '<legend updateDrawingOrder="true"> \n' \
+                             '<legendlayer drawingOrder="-1" open="true" ' \
+                             'checked="Qt::Checked" name="%s"' \
+                             ' showFeatureCount="0"> \n' \
+                             '<filegroup open="true" hidden="false"> \n' \
+                             '<legendlayerfile isInOverview="0" ' \
+                             'layerid="%s" visible="1"/> \n' \
+                             '</filegroup>\n</legendlayer>\n' \
+                             '</legend>\n' % (file_name, layer.id())
+                xml_legend = ET.fromstring(xml_string)
+
+                document = ET.parse(project)
+                xml_root = document.getroot()
+                xml_root.append(xml_legend)
+                document.write(project)
 
             del params['MAP']
             request.setParameter('MAP', project)
