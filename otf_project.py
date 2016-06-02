@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from qgis.core import QgsMessageLog, QgsLogger
+from filters.CreateOrReadProject import CreateOrReadProject
 
 __author__ = 'Etienne Trimaille'
 __date__ = '25/05/2016'
@@ -12,23 +13,15 @@ class OtfProjectServer:
     errors"""
 
     def __init__(self, server_iface):
-        # Save reference to the QGIS server interface
-        self.server_iface = server_iface
-        import filters
-        priority = 1
-
         QgsMessageLog.logMessage(
             'SUCCESS - OTF Project init', 'plugin', QgsMessageLog.INFO)
 
-        for filter_name in filters.local_modules:
-            QgsLogger.debug('OTF Project - loading filter %s' % filter_name)
-
+        filters = [CreateOrReadProject]
+        for i, f in enumerate(filters):
+            name = f.__name__
             try:
-                server_iface.registerFilter(
-                    getattr(filters, filter_name)(server_iface),
-                    priority * 100)
-                priority += 1
+                server_iface.registerFilter(f(server_iface), i)
+                QgsMessageLog.logMessage('OTF Project - loading %s' % name)
             except Exception, e:
-                QgsLogger.debug(
-                    'OTF Project - Error loading filter %s : %s'
-                    % (filter_name, e))
+                QgsMessageLog.logMessage(
+                    'OTF Project - Error loading %s : %s' % (name, e))
