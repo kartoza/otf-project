@@ -56,6 +56,15 @@ class CreateOrReadProjectFilter(QgsServerFilter):
 
                 if map_file.endswith(('shp', 'geojson')):
                     layer = QgsVectorLayer(map_file, file_name, 'ogr')
+
+                    layer_id = layer.id()
+                    # We need to enable WFS, adapted from the QGIS repo :
+                    # https://github.com/qgis/QGIS/blob/master/src/app/
+                    # qgsprojectproperties.cpp#L1109
+                    qgis_project.writeEntry(
+                        'WFSLayersPrecision', '/%s' % layer_id, 8)
+                    qgis_project.writeEntry('WFSLayers', '/', [layer_id])
+
                 elif map_file.endswith(('asc', 'tiff', 'tif')):
                     layer = QgsRasterLayer(map_file, 'layer')
                 else:
