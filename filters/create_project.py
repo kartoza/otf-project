@@ -48,10 +48,10 @@ def generate_legend(layers, project):
     document.write(project)
 
 
-class CreateOrReadProject(QgsServerFilter):
+class CreateProject(QgsServerFilter):
 
     def __init__(self, server_iface):
-        super(CreateOrReadProject, self).__init__(server_iface)
+        super(CreateProject, self).__init__(server_iface)
 
     # noinspection PyPep8Naming
     def requestReady(self):

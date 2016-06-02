@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from qgis.core import QgsMessageLog, QgsLogger
-from filters.CreateOrReadProject import CreateOrReadProject
-from filters.MapComposition import MapComposition
+from filters.create_project import CreateProject
+from filters.map_composition import MapComposition
 
 __author__ = 'Etienne Trimaille'
 __date__ = '25/05/2016'
@@ -17,7 +17,7 @@ class OtfProjectServer:
         QgsMessageLog.logMessage(
             'SUCCESS - OTF Project init', 'plugin', QgsMessageLog.INFO)
 
-        filters = [MapComposition, CreateOrReadProject]
+        filters = [MapComposition, CreateProject]
         for i, f in enumerate(filters):
             name = f.__name__
             try:
