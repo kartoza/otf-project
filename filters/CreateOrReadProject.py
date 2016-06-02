@@ -60,53 +60,56 @@ class CreateOrReadProject(QgsServerFilter):
 
         map_file = params.get('MAP')
 
-        if not map_file.endswith('qgs'):
+        if params.get('SERVICE', '').upper() in ['WMS', 'WCS', 'WFS']:
+            if not map_file.endswith('qgs'):
 
-            project = splitext(map_file)[0] + '.qgs'
-            file_name = splitext(basename(map_file))[0]
-
-            if not exists(project) and not isfile(project):
-                QgsMessageLog.logMessage('Setting up project to %s' % project)
-                qgis_project = QgsProject.instance()
-                qgis_project.setFileName(project)
-                QgsMessageLog.logMessage(
-                    'Project instance %s' % qgis_project.fileName())
-
-                if map_file.endswith(('shp', 'geojson')):
-                    layer = QgsVectorLayer(map_file, file_name, 'ogr')
-
-                    layer_id = layer.id()
-                    # We need to enable WFS, adapted from the QGIS repo :
-                    # https://github.com/qgis/QGIS/blob/master/src/app/
-                    # qgsprojectproperties.cpp#L1109
-                    qgis_project.writeEntry(
-                        'WFSLayersPrecision', '/%s' % layer_id, 8)
-                    qgis_project.writeEntry('WFSLayers', '/', [layer_id])
-
-                elif map_file.endswith(('asc', 'tiff', 'tif')):
-                    layer = QgsRasterLayer(map_file, 'layer')
-                else:
-                    QgsMessageLog.logMessage('Invalid format : %s' % map_file)
-                    return
-
-                QgsMessageLog.logMessage(
-                    'Layer is valid : %s' % layer.isValid())
-
-                # Add layer to the registry
-                QgsMapLayerRegistry.instance().addMapLayer(layer)
-                qgis_project.write()
+                project = splitext(map_file)[0] + '.qgs'
+                file_name = splitext(basename(map_file))[0]
 
                 if not exists(project) and not isfile(project):
-                    QgsMessageLog.logMessage(qgis_project.error())
-                    return
+                    QgsMessageLog.logMessage(
+                        'Setting up project to %s' % project)
+                    qgis_project = QgsProject.instance()
+                    qgis_project.setFileName(project)
+                    QgsMessageLog.logMessage(
+                        'Project instance %s' % qgis_project.fileName())
 
-                layers = [layer]
-                # QGIS do not put the legend node because we are on a server.
-                # We need to add manually.
-                generate_legend(layers, project)
+                    if map_file.endswith(('shp', 'geojson')):
+                        layer = QgsVectorLayer(map_file, file_name, 'ogr')
 
-            del params['MAP']
-            request.setParameter('MAP', project)
+                        layer_id = layer.id()
+                        # We need to enable WFS, adapted from the QGIS repo :
+                        # https://github.com/qgis/QGIS/blob/master/src/app/
+                        # qgsprojectproperties.cpp#L1109
+                        qgis_project.writeEntry(
+                            'WFSLayersPrecision', '/%s' % layer_id, 8)
+                        qgis_project.writeEntry('WFSLayers', '/', [layer_id])
 
-        else:
-            QgsMessageLog.logMessage('QGIS Project existing.')
+                    elif map_file.endswith(('asc', 'tiff', 'tif')):
+                        layer = QgsRasterLayer(map_file, 'layer')
+                    else:
+                        QgsMessageLog.logMessage(
+                            'Invalid format : %s' % map_file)
+                        return
+
+                    QgsMessageLog.logMessage(
+                        'Layer is valid : %s' % layer.isValid())
+
+                    # Add layer to the registry
+                    QgsMapLayerRegistry.instance().addMapLayer(layer)
+                    qgis_project.write()
+
+                    if not exists(project) and not isfile(project):
+                        QgsMessageLog.logMessage(qgis_project.error())
+                        return
+
+                    layers = [layer]
+                    # QGIS don't put the legend because we are on a server.
+                    # We need to add manually.
+                    generate_legend(layers, project)
+
+                del params['MAP']
+                request.setParameter('MAP', project)
+
+            else:
+                QgsMessageLog.logMessage('QGIS Project existing.')
