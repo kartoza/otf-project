@@ -89,10 +89,13 @@ class MapComposition(QgsServerFilter):
             project.setFileName(project_path)
 
             qgis_layers = []
+            vector_layers = []
+
             for layer in layers:
                 layer_name = splitext(basename(layer))[0]
                 if layer.endswith(('shp', 'geojson')):
                     qgis_layer = QgsVectorLayer(layer, layer_name, 'ogr')
+                    vector_layers.append(qgis_layer.id())
 
                 elif layer.endswith(('asc', 'tiff', 'tif')):
                     qgis_layer = QgsRasterLayer(layer, layer_name)
@@ -108,6 +111,11 @@ class MapComposition(QgsServerFilter):
 
                 # Add layer to the registry
                 QgsMapLayerRegistry.instance().addMapLayer(qgis_layer)
+
+            if len(vector_layers):
+                for layer in vector_layers:
+                    project.writeEntry('WFSLayersPrecision', '/%s' % layer, 8)
+                project.writeEntry('WFSLayers', '/', vector_layers)
 
             project.write()
 
