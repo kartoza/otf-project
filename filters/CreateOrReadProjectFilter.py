@@ -49,9 +49,10 @@ class CreateOrReadProjectFilter(QgsServerFilter):
 
             if not exists(project) and not isfile(project):
                 QgsMessageLog.logMessage('Setting up project to %s' % project)
-                QgsProject.instance().setFileName(project)
+                qgis_project = QgsProject.instance()
+                qgis_project.setFileName(project)
                 QgsMessageLog.logMessage(
-                    'Project instance %s' % QgsProject.instance().fileName())
+                    'Project instance %s' % qgis_project.fileName())
 
                 if map_file.endswith(('shp', 'geojson')):
                     layer = QgsVectorLayer(map_file, file_name, 'ogr')
@@ -66,10 +67,10 @@ class CreateOrReadProjectFilter(QgsServerFilter):
 
                 # Add layer to the registry
                 QgsMapLayerRegistry.instance().addMapLayer(layer)
-                QgsProject.instance().write()
+                qgis_project.write()
 
                 if not exists(project) and not isfile(project):
-                    QgsMessageLog.logMessage(QgsProject.instance().error())
+                    QgsMessageLog.logMessage(qgis_project.error())
                     return
 
                 # QGIS do not put the legend node because we are on a server.
