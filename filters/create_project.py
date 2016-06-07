@@ -59,12 +59,15 @@ class CreateProject(QgsServerFilter):
         params = request.parameterMap()
 
         map_file = params.get('MAP')
+        layer_name = params.get('LAYERS')
 
         if params.get('SERVICE', '').upper() in ['WMS', 'WCS', 'WFS']:
             if not map_file.endswith('qgs'):
 
                 project = splitext(map_file)[0] + '.qgs'
                 file_name = splitext(basename(map_file))[0]
+                if layer_name is None:
+                    layer_name = file_name
 
                 if not exists(project) and not isfile(project):
                     QgsMessageLog.logMessage(
@@ -75,7 +78,7 @@ class CreateProject(QgsServerFilter):
                         'Project instance %s' % qgis_project.fileName())
 
                     if map_file.endswith(('shp', 'geojson')):
-                        layer = QgsVectorLayer(map_file, file_name, 'ogr')
+                        layer = QgsVectorLayer(map_file, layer_name, 'ogr')
 
                         layer_id = layer.id()
                         # We need to enable WFS, adapted from the QGIS repo :
@@ -86,7 +89,7 @@ class CreateProject(QgsServerFilter):
                         qgis_project.writeEntry('WFSLayers', '/', [layer_id])
 
                     elif map_file.endswith(('asc', 'tiff', 'tif')):
-                        layer = QgsRasterLayer(map_file, 'layer')
+                        layer = QgsRasterLayer(map_file, layer_name)
                     else:
                         QgsMessageLog.logMessage(
                             'Invalid format : %s' % map_file)
