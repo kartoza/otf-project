@@ -73,15 +73,15 @@ class MapComposition(QgsServerFilter):
                 request.appendBody(msg)
                 return
 
-            layers_parameters = params.get('LAYERS')
-            if not layers_parameters:
-                request.appendBody('LAYERS is missing.\n')
+            files_parameters = params.get('FILES')
+            if not files_parameters:
+                request.appendBody('FILES is missing.\n')
                 return
 
-            layers = layers_parameters.split(';')
-            for layer in layers:
+            files = files_parameters.split(';')
+            for layer in files:
                 if not exists(layer):
-                    request.appendBody('layer not found : %s.\n' % layer)
+                    request.appendBody('file not found : %s.\n' % layer)
                     return
 
             QgsMessageLog.logMessage('Setting up project to %s' % project_path)
@@ -91,7 +91,7 @@ class MapComposition(QgsServerFilter):
             qgis_layers = []
             vector_layers = []
 
-            for layer in layers:
+            for layer in files:
                 layer_name = splitext(basename(layer))[0]
                 if layer.endswith(('shp', 'geojson')):
                     qgis_layer = QgsVectorLayer(layer, layer_name, 'ogr')

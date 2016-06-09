@@ -60,6 +60,8 @@ class CreateProject(QgsServerFilter):
 
         map_file = params.get('MAP')
         layer_name = params.get('LAYERS')
+        if layer_name is None:
+            layer_name = params.get('LAYER')
 
         if params.get('SERVICE', '').upper() in ['WMS', 'WCS', 'WFS']:
             if not map_file.endswith('qgs'):
