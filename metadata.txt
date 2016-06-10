@@ -2,10 +2,10 @@
 name=OTF-Project
 qgisMinimumVersion=2.5
 qgisMaximumVersion=2.99
-about=To create a QGIS Project OTF
+about=Thanks to this plugin, you can call a WMS or a WFS with a layer path directly. The plugin will create the QGIS project on the fly. You can also create a map composition by calling many layers, it will also create the QGIS project.
 description=To create a QGIS Project OTF
-version=1.0
-author=Etienne Trimaille (Kartoza)
+version=0.1
+author=Etienne Trimaille
 email=etienne@kartoza.com
 ; if True it's a server plugin
 server=True
@@ -13,7 +13,7 @@ server=True
 changelog=
 
 
-tags=qgis project, server
+tags=qgis project, server, project, ows, wms, wfs
 
 tracker=https://github.com/Gustry/otf-project
 homepage=https://github.com/Gustry/otf-project
