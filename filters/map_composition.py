@@ -18,6 +18,7 @@
 """
 
 from os.path import exists, splitext, basename, isfile
+from os import remove
 from qgis.server import QgsServerFilter
 from qgis.core import (
     QgsProject,
@@ -35,9 +36,19 @@ class MapComposition(QgsServerFilter):
 
     # noinspection PyPep8Naming
     def responseComplete(self):
+        """Create a QGIS Project.
+
+        Example :
+        SERVICE=MAPCOMPOSITION&
+        PROJECT=/destination/project.qgs&
+        FILES=/path/1.shp;/path/2.shp;/path/3.asc&
+        NAMES=Layer 1;Layer 2;Layer 3&
+        OVERWRITE=true
+        """
         QgsMessageLog.logMessage('MapComposition.responseComplete')
         request = self.serverInterface().requestHandler()
         params = request.parameterMap()
+
         if params.get('SERVICE', '').upper() == 'MAPCOMPOSITION':
             request.clearHeaders()
             request.setHeader('Content-type', 'text/plain')
@@ -48,10 +59,22 @@ class MapComposition(QgsServerFilter):
                 request.appendBody('PROJECT is missing.\n')
                 return
 
+            overwrite = params.get('OVERWRITE')
+            if overwrite:
+                if overwrite.upper() in ['1', 'YES', 'TRUE']:
+                    overwrite = True
+                else:
+                    overwrite = False
+            else:
+                overwrite = False
+
             if exists(project_path):
-                msg = 'PROJECT is already existing : %s \n' % project_path
-                request.appendBody(msg)
-                return
+                if not overwrite:
+                    msg = 'PROJECT is already existing : %s \n' % project_path
+                    request.appendBody(msg)
+                    return
+                else:
+                    remove(project_path)
 
             files_parameters = params.get('FILES')
             if not files_parameters:
@@ -64,6 +87,15 @@ class MapComposition(QgsServerFilter):
                     request.appendBody('file not found : %s.\n' % layer)
                     return
 
+            names_parameters = params.get('NAMES', None)
+            if names_parameters:
+                names = names_parameters.split(';')
+                if len(names) != len(files):
+                    request.appendBody('Not same length names and files')
+                    return
+            else:
+                names = [splitext(basename(layer))[0] for layer in files]
+
             QgsMessageLog.logMessage('Setting up project to %s' % project_path)
             project = QgsProject.instance()
             project.setFileName(project_path)
@@ -71,8 +103,7 @@ class MapComposition(QgsServerFilter):
             qgis_layers = []
             vector_layers = []
 
-            for layer in files:
-                layer_name = splitext(basename(layer))[0]
+            for layer_name, layer in zip(names, files):
                 if layer.endswith(('shp', 'geojson')):
                     qgis_layer = QgsVectorLayer(layer, layer_name, 'ogr')
                     vector_layers.append(qgis_layer.id())

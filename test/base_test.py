@@ -30,8 +30,6 @@ class TestServerPlugin(unittest.TestCase):
 
         self.string = "QUERY_STRING='"
         for param, value in query_string.iteritems():
-            if param == 'MAP':
-                value = TEST_DATA + value
             self.string += param + '=' + value + '&'
         self.string += "'"
 

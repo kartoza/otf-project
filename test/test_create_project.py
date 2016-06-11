@@ -18,6 +18,7 @@
 """
 
 from base_test import TestServerPlugin
+TEST_DATA = '/home/etienne/kartoza_dev/server_plugins/otf-project/test/data/'
 
 
 class TestCreateProject(TestServerPlugin):
@@ -30,5 +31,19 @@ class TestCreateProject(TestServerPlugin):
             'MAP': 'tsunami_wgs84.tif'
         }
 
+        result = self.request(query_string)
+        print result
+
+    def test_map_composition(self):
+
+        files = TEST_DATA + 'buildings.shp;' + TEST_DATA + 'tsunami_wgs84.tif'
+
+        query_string = {
+            'SERVICE': 'MAPCOMPOSITION',
+            'OVERWRITE': 'true',
+            'PROJECT': '/tmp/project.qgs',
+            'FILES': files,
+            'NAMES': 'toto;titi'
+        }
         result = self.request(query_string)
         print result

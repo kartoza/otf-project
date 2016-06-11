@@ -18,7 +18,7 @@
 """
 
 from qgis.core import QgsMessageLog, QgsLogger
-from filters.create_project import CreateProject
+# from filters.create_project import CreateProject
 from filters.map_composition import MapComposition
 
 __author__ = 'Etienne Trimaille'
@@ -34,7 +34,7 @@ class OtfProjectServer:
         QgsMessageLog.logMessage(
             'SUCCESS - OTF Project init', 'plugin', QgsMessageLog.INFO)
 
-        filters = [MapComposition, CreateProject]
+        filters = [MapComposition]
         for i, f in enumerate(filters):
             name = f.__name__
             try:

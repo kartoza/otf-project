@@ -3,6 +3,8 @@
 * Supported raster formats : asc, tif, tiff
 * Supported vector formats : shp, geojson
 
+**This project is still in development, the API may change.**
+
 ## WMS and WFS :
 * For the MAP parameter, if we use a qgs file, the request will be forwarded to QGIS Server. However, if the MAP parameter is one of the supported formats, the plugin will create the project on the fly and then the request will be forwarded to QGIS Server.
 
