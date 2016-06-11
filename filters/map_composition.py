@@ -2,12 +2,11 @@
 
 """
 ***************************************************************************
-    QGIS Server Plugin Filters: say hello test filter, just logs calls and
-    prints HelloServer! on plain text response
+    OTF QGIS Project
     ---------------------
-    Date                 : October 2014
-    Copyright            : (C) 2014-2015 by Alessandro Pasotti
-    Email                : apasotti at gmail dot com
+    Date                 : June 2016
+    Copyright            : (C) 2016 by Etienne Trimaille
+    Email                : etienne at kartoza dot com
 ***************************************************************************
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -18,7 +17,6 @@
 ***************************************************************************
 """
 
-import xml.etree.ElementTree as ET
 from os.path import exists, splitext, basename, isfile
 from qgis.server import QgsServerFilter
 from qgis.core import (
@@ -27,25 +25,7 @@ from qgis.core import (
     QgsMessageLog,
     QgsVectorLayer,
     QgsRasterLayer)
-
-
-def generate_legend(layers, project):
-    xml_string = '<legend updateDrawingOrder="true"> \n'
-    for layer in layers:
-        xml_string += '<legendlayer drawingOrder="-1" ' \
-                      'open="true" checked="Qt::Checked" ' \
-                      'name="%s" showFeatureCount="0"> \n' \
-                      '<filegroup open="true" hidden="false"> \n' \
-                      '<legendlayerfile isInOverview="0" ' \
-                      'layerid="%s" visible="1"/> \n' \
-                      '</filegroup>\n</legendlayer>\n' \
-                      % (layer.name(), layer.id())
-    xml_string += '</legend>\n'
-    xml_legend = ET.fromstring(xml_string)
-    document = ET.parse(project)
-    xml_root = document.getroot()
-    xml_root.append(xml_legend)
-    document.write(project)
+from filters.tools import generate_legend
 
 
 class MapComposition(QgsServerFilter):
