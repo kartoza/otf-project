@@ -15,9 +15,9 @@ changelog=
 
 tags=qgis project, server, project, ows, wms, wfs
 
-tracker=https://github.com/Gustry/otf-project
-homepage=https://github.com/Gustry/otf-project
-repository=https://github.com/Gustry/otf-project
+tracker=https://github.com/kartoza/otf-project
+homepage=https://github.com/kartoza/otf-project
+repository=https://github.com/kartoza/otf-project
 
 category=server
 
