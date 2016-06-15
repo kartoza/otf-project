@@ -25,7 +25,7 @@ __author__ = 'Etienne Trimaille'
 __date__ = '25/05/2016'
 
 
-class OtfProjectServer:
+class OtfProjectServer(object):
     """Test plugin for QGIS server
     this plugin loads all filters from the 'filters' directory and logs
     errors"""
