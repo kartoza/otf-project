@@ -129,6 +129,7 @@ class MapComposition(QgsServerFilter):
                 project.writeEntry('WFSLayers', '/', vector_layers)
 
             project.write()
+            project.clear()
 
             if not exists(project_path) and not isfile(project_path):
                 request.appendBody(project.error())
