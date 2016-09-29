@@ -25,7 +25,7 @@ from qgis.core import (
     QgsMessageLog,
     QgsVectorLayer,
     QgsRasterLayer)
-from filters.tools import generate_legend
+from .tools import generate_legend
 
 
 class CreateProject(QgsServerFilter):

@@ -17,7 +17,7 @@
 ***************************************************************************
 """
 
-from base_test import TestServerPlugin
+from .base_test import TestServerPlugin
 TEST_DATA = '/home/etienne/kartoza_dev/server_plugins/otf-project/test/data/'
 
 

@@ -26,7 +26,7 @@ from qgis.core import (
     QgsMessageLog,
     QgsVectorLayer,
     QgsRasterLayer)
-from tools import generate_legend
+from .tools import generate_legend
 
 
 class MapComposition(QgsServerFilter):
