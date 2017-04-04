@@ -26,9 +26,8 @@ __date__ = '25/05/2016'
 
 
 class OtfProjectServer(object):
-    """Test plugin for QGIS server
-    this plugin loads all filters from the 'filters' directory and logs
-    errors"""
+
+    """Plugin to create QGIS Project on the server."""
 
     def __init__(self, server_iface):
         QgsMessageLog.logMessage(

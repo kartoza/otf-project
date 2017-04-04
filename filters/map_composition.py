@@ -31,6 +31,8 @@ from .tools import generate_legend
 
 class MapComposition(QgsServerFilter):
 
+    """Class to create a QGIS Project with one or many layers."""
+
     def __init__(self, server_iface):
         super(MapComposition, self).__init__(server_iface)
 
@@ -56,7 +58,7 @@ class MapComposition(QgsServerFilter):
 
             project_path = params.get('PROJECT')
             if not project_path:
-                request.appendBody('PROJECT is missing.\n')
+                request.appendBody('PROJECT parameter is missing.\n')
                 return
 
             overwrite = params.get('OVERWRITE')
@@ -78,7 +80,7 @@ class MapComposition(QgsServerFilter):
 
             files_parameters = params.get('FILES')
             if not files_parameters:
-                request.appendBody('FILES is missing.\n')
+                request.appendBody('FILES parameter is missing.\n')
                 return
 
             files = files_parameters.split(';')
@@ -91,7 +93,8 @@ class MapComposition(QgsServerFilter):
             if names_parameters:
                 names = names_parameters.split(';')
                 if len(names) != len(files):
-                    request.appendBody('Not same length names and files')
+                    request.appendBody(
+                        'Not same length between NAMES and FILES')
                     return
             else:
                 names = [splitext(basename(layer))[0] for layer in files]
