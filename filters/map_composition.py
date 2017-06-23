@@ -123,6 +123,27 @@ class MapComposition(QgsServerFilter):
 
                 qgis_layers.append(qgis_layer)
 
+                qml = splitext(qgis_layer.source())[0] + '.qml'
+                if exists(qml) and isfile(qml):
+                    # QML will be picked up automatically by QGIS Server.
+                    QgsMessageLog.logMessage('QML detected')
+                else:
+                    # But not if the layer has a SLD file.
+                    sld = splitext(qgis_layer.source())[0] + '.sld'
+                    if exists(sld) and isfile(sld):
+                        QgsMessageLog.logMessage('SLD detected')
+                        result = False
+                        layer.loadSldStyle(sld)
+                        if not result:
+                            QgsMessageLog.logMessage(
+                                 'Invalid SLD while loading : %s' % sld)
+                        layer.saveDefaultStyle(result)
+                        if not result:
+                            QgsMessageLog.logMessage(
+                                'Invalid QML while saving : %s' % sld)
+                    else:
+                        QgsMessageLog.logMessage('SLD not detected')
+
                 # Add layer to the registry
                 QgsMapLayerRegistry.instance().addMapLayer(qgis_layer)
 
