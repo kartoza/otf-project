@@ -105,6 +105,7 @@ class MapComposition(QgsServerFilter):
 
             qgis_layers = []
             vector_layers = []
+            raster_layer = []
 
             for layer_name, layer in zip(names, files):
                 if layer.endswith(('shp', 'geojson')):
@@ -113,6 +114,7 @@ class MapComposition(QgsServerFilter):
 
                 elif layer.endswith(('asc', 'tiff', 'tif')):
                     qgis_layer = QgsRasterLayer(layer, layer_name)
+                    raster_layer.append(qgis_layer.id())
                 else:
                     request.appendBody('Invalid format : %s' % layer)
                     return
@@ -130,6 +132,9 @@ class MapComposition(QgsServerFilter):
                 for layer in vector_layers:
                     project.writeEntry('WFSLayersPrecision', '/%s' % layer, 8)
                 project.writeEntry('WFSLayers', '/', vector_layers)
+
+            if len(raster_layer):
+                project.writeEntry('WCSLayers', '/', raster_layer)
 
             project.write()
             project.clear()
