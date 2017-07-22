@@ -45,6 +45,7 @@ class MapComposition(QgsServerFilter):
         PROJECT=/destination/project.qgs&
         FILES=/path/1.shp;/path/2.shp;/path/3.asc&
         NAMES=Layer 1;Layer 2;Layer 3&
+        REMOVEQML=true&
         OVERWRITE=true
         """
         QgsMessageLog.logMessage('MapComposition.responseComplete')
@@ -70,6 +71,15 @@ class MapComposition(QgsServerFilter):
             else:
                 overwrite = False
 
+            remove_qml = params.get('REMOVEQML')
+            if remove_qml:
+                if remove_qml.upper() in ['1', 'YES', 'TRUE']:
+                    remove_qml = True
+                else:
+                    remove_qml = False
+            else:
+                remove_qml = False
+
             if exists(project_path):
                 if not overwrite:
                     msg = 'PROJECT is already existing : %s \n' % project_path
@@ -84,9 +94,9 @@ class MapComposition(QgsServerFilter):
                 return
 
             files = files_parameters.split(';')
-            for layer in files:
-                if not exists(layer):
-                    request.appendBody('file not found : %s.\n' % layer)
+            for layer_file in files:
+                if not exists(layer_file):
+                    request.appendBody('file not found : %s.\n' % layer_file)
                     return
 
             names_parameters = params.get('NAMES', None)
@@ -97,40 +107,48 @@ class MapComposition(QgsServerFilter):
                         'Not same length between NAMES and FILES')
                     return
             else:
-                names = [splitext(basename(layer))[0] for layer in files]
+                names = [
+                    splitext(basename(layer_file))[0] for layer_file in files]
 
             QgsMessageLog.logMessage('Setting up project to %s' % project_path)
             project = QgsProject.instance()
             project.setFileName(project_path)
 
+            qml_files = []
             qgis_layers = []
             vector_layers = []
             raster_layer = []
 
-            for layer_name, layer in zip(names, files):
-                if layer.endswith(('shp', 'geojson')):
-                    qgis_layer = QgsVectorLayer(layer, layer_name, 'ogr')
+            for layer_name, layer_file in zip(names, files):
+                if layer_file.endswith(('shp', 'geojson')):
+                    qgis_layer = QgsVectorLayer(layer_file, layer_name, 'ogr')
                     vector_layers.append(qgis_layer.id())
 
-                elif layer.endswith(('asc', 'tiff', 'tif')):
-                    qgis_layer = QgsRasterLayer(layer, layer_name)
+                elif layer_file.endswith(('asc', 'tiff', 'tif')):
+                    qgis_layer = QgsRasterLayer(layer_file, layer_name)
                     raster_layer.append(qgis_layer.id())
                 else:
-                    request.appendBody('Invalid format : %s' % layer)
+                    request.appendBody('Invalid format : %s' % layer_file)
                     return
 
                 if not qgis_layer.isValid():
-                    request.appendBody('Layer is not valid : %s' % layer)
+                    request.appendBody('Layer is not valid : %s' % layer_file)
                     return
 
                 qgis_layers.append(qgis_layer)
+
+                qml_file = splitext(layer_file)[0] + '.qml'
+                if exists(qml_file):
+                    # Check if there is a QML
+                    qml_files.append(qml_file)
 
                 # Add layer to the registry
                 QgsMapLayerRegistry.instance().addMapLayer(qgis_layer)
 
             if len(vector_layers):
-                for layer in vector_layers:
-                    project.writeEntry('WFSLayersPrecision', '/%s' % layer, 8)
+                for layer_file in vector_layers:
+                    project.writeEntry(
+                        'WFSLayersPrecision', '/%s' % layer_file, 8)
                 project.writeEntry('WFSLayers', '/', vector_layers)
 
             if len(raster_layer):
@@ -144,5 +162,11 @@ class MapComposition(QgsServerFilter):
                 return
 
             generate_legend(qgis_layers, project_path)
+
+            if remove_qml:
+                for qml in qml_files:
+                    QgsMessageLog.logMessage(
+                        'Removing QML {path}'.format(path=qml))
+                    remove(qml)
 
             request.appendBody('OK')

@@ -18,7 +18,7 @@
 """
 
 from qgis.core import QgsMessageLog, QgsLogger
-# from filters.create_project import CreateProject
+# from filters.style_manager import StyleManager
 from filters.map_composition import MapComposition
 
 __author__ = 'Etienne Trimaille'
