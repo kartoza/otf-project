@@ -42,3 +42,39 @@ REQUEST=GetCapabilities
 ## Todo
 * Add WCS
 * Add tests
+
+# Manage styles for a layer
+
+* Parameters, add a new style to a layer:
+  * SERVICE=STYLEMANAGER, compulsory
+  * REQUEST=AddStyle, compulsory
+  * PROJECT=/destination/project.qgs, compulsory, path to the QGIS project
+  * LAYER=myLayerName, compulsory, name of the layer
+  * QML=/path/to/style.qml, compulsory, path to the QML
+  * NAME=name of my style, compulsory, name of the style in the QGIS settings
+  * REMOVEQML=true, optional, if we should remove the QML after the process. The QML is already stored in the QGIS project.
+* Parameters for removing a style:
+  * SERVICE=STYLEMANAGER, compulsory
+  * REQUEST=RemoveStyle, compulsory
+  * PROJECT=/destination/project.qgs, compulsory, path to the QGIS project
+  * LAYER=myLayerName, compulsory, name of the layer
+  * NAME=name of my style, compulsory, name of the style in the QGIS settings
+* Parameters for getting the QML as XML:
+  * SERVICE=STYLEMANAGER, compulsory
+  * REQUEST=GetStyle, compulsory
+  * PROJECT=/destination/project.qgs, compulsory, path to the QGIS project
+  * LAYER=myLayerName, compulsory, name of the layer
+  * NAME=name of my style, compulsory, name of the style in the QGIS settings
+* Parameters for setting an existing style as default:
+  * SERVICE=STYLEMANAGER, compulsory
+  * REQUEST=SetDefaultStyle, compulsory
+  * PROJECT=/destination/project.qgs, compulsory, path to the QGIS project
+  * LAYER=myLayerName, compulsory, name of the layer
+  * NAME=name of my style, compulsory, name of the style in the QGIS settings
+# Development
+
+* The quickest way to use QGIS Server with the command line with docker. No need to relaunch something.
+```
+docker pull kartoza/qgis-server:LTR
+QUERY_STRING="SERVICE=STYLEMANAGER&PROJECT=/usr/src/app/geonode/qgis_layer/small_building.qgs&REQUEST=GetStyle&LAYER=build&NAME=toto" /usr/lib/cgi-bin/qgis_mapserv.fcgi
+```

@@ -20,6 +20,17 @@ import xml.etree.ElementTree as ET
 
 
 def generate_legend(layers, project):
+    """Regenerate the XML for the legend.
+
+    QGIS Server itself is broken to generate a project as it's need a
+    GUI to generate a correct project. We need to update the XML manually.
+
+    :param layers: List of layers in the project to include in the legend.
+    :type layers: list(QgsMapLayer)
+
+    :param project: The project path to update.
+    :type project: basestring
+    """
     xml_string = '<legend updateDrawingOrder="true"> \n'
     for layer in layers:
         xml_string += '<legendlayer drawingOrder="-1" ' \
