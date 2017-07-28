@@ -109,6 +109,12 @@ class StyleManager(QgsServerFilter):
                 qgis_layer = qgis_layer[0]
 
             # NAME
+            # Check default name should be `default` to follow GetCapabilities
+            # response
+            style_manager = qgis_layer.styleManager()
+            style_manager.renameStyle('', 'default')
+            project.write()
+
             name = params.get('NAME')
             if not name:
                 request.appendBody('NAME parameter is missing.\n')
@@ -123,7 +129,8 @@ class StyleManager(QgsServerFilter):
             elif service == 'GetStyle':
                 return self.get_style(name, qgis_layer, request)
             elif service == 'SetDefaultStyle':
-                return self.set_default_style()
+                return self.set_default_style(
+                    name, project, project_path, qgis_layer, request)
 
     @staticmethod
     def set_default_style(name, project, project_path, qgis_layer, request):
