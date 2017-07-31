@@ -142,6 +142,9 @@ class MapComposition(QgsServerFilter):
                     # Check if there is a QML
                     qml_files.append(qml_file)
 
+                style_manager = qgis_layer.styleManager()
+                style_manager.renameStyle('', 'default')
+
                 # Add layer to the registry
                 QgsMapLayerRegistry.instance().addMapLayer(qgis_layer)
 

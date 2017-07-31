@@ -17,7 +17,7 @@
 ***************************************************************************
 """
 
-from os.path import exists, splitext, basename, isfile
+from os.path import exists
 from os import remove
 from qgis.server import QgsServerFilter
 from qgis.core import (
@@ -112,7 +112,8 @@ class StyleManager(QgsServerFilter):
             # Check default name should be `default` to follow GetCapabilities
             # response
             style_manager = qgis_layer.styleManager()
-            style_manager.renameStyle('', 'default')
+            if '' in style_manager.styles():
+                style_manager.renameStyle('', 'default')
             project.write()
 
             name = params.get('NAME')
