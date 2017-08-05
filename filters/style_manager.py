@@ -114,7 +114,14 @@ class StyleManager(QgsServerFilter):
             style_manager = qgis_layer.styleManager()
             if '' in style_manager.styles():
                 style_manager.renameStyle('', 'default')
-            project.write()
+                project.write()
+                # Make sure properties are saved.
+                # So GetCapabilities are working.
+                project.clear()
+
+                # Reread project
+                project.setFileName(project_path)
+                project.read()
 
             name = params.get('NAME')
             if not name:
