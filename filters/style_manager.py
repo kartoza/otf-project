@@ -50,7 +50,6 @@ class StyleManager(QgsServerFilter):
         NAME=name of my style&
         REMOVEQML=true
         """
-        QgsMessageLog.logMessage('StyleManager.responseComplete')
         request = self.serverInterface().requestHandler()
         params = request.parameterMap()
 

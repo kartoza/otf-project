@@ -48,7 +48,6 @@ class MapComposition(QgsServerFilter):
         REMOVEQML=true&
         OVERWRITE=true
         """
-        QgsMessageLog.logMessage('MapComposition.responseComplete')
         request = self.serverInterface().requestHandler()
         params = request.parameterMap()
 

@@ -71,6 +71,33 @@ REQUEST=GetCapabilities
   * PROJECT=/destination/project.qgs, compulsory, path to the QGIS project
   * LAYER=myLayerName, compulsory, name of the layer
   * NAME=name of my style, compulsory, name of the style in the QGIS settings
+
+# Create QGIS Layer Definitions Files
+
+Create your structure like this and encode it:
+```
+>>> from json import dumps
+>>> from requests.utils import quote
+>>> layers = [{
+...   'type':'raster',
+...   'display':'layer name 1',
+...   'driver': 'wms',
+...   'crs':'EPSG:4326', 'format':'image/png', 'styles':'', 'layers':'tmpeqfzkt', 'url':'http://staging.geonode.kartoza.com/qgis-server/ogc/tmpeqfzkt'}
+...   ]
+>>> query_string = quote(layers)
+```
+* You can add as many layers as you want in the list.
+* 'type', 'display', 'driver' are specific for QGIS. Other parameters are specific for the driver to be able to open the layer.
+
+Then make a request with:
+```
+http://localhost:81/qgis?
+SERVICE=LAYERDEFINITIONS&
+LAYERS=your_quoted_layers_variable
+```
+
+* You will get a XML string for the QLR.
+
 # Development
 
 * The quickest way to use QGIS Server with the command line with docker. No need to relaunch something.
