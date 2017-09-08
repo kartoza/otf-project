@@ -72,7 +72,7 @@ REQUEST=GetCapabilities
   * LAYER=myLayerName, compulsory, name of the layer
   * NAME=name of my style, compulsory, name of the style in the QGIS settings
 
-# Create QGIS Layer Definitions Files
+# Create QGIS Layer Definitions Files or a QGIS project
 
 Create your structure like this and encode it:
 ```
@@ -97,6 +97,8 @@ LAYERS=your_quoted_layers_variable
 ```
 
 * You will get a XML string for the QLR.
+
+* Same kind of request to get a QGIS Project instead of a QLR. Replace `LAYERDEFINITIONS` in the URL by `PROJECTDEFINITIONS`.
 
 # Development
 

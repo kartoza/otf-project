@@ -17,6 +17,9 @@
 ***************************************************************************
 """
 
+import tempfile
+
+from os import remove
 from json import loads
 from qgis.server import QgsServerFilter
 from qgis.core import (
@@ -25,18 +28,12 @@ from qgis.core import (
     QgsMessageLog,
     QgsVectorLayer,
     QgsRasterLayer)
-
-
-def query_string_to_dict(query_string):
-    final_dict = dict()
-    for item in query_string.split("&"):
-        final_dict[item.split("=")[0]] = item.split("=")[1]
-    return final_dict
+from .tools import generate_legend
 
 
 class LayerDefinition(QgsServerFilter):
 
-    """Class to create a QLR file."""
+    """Class to create a QLR file, or a project."""
 
     def __init__(self, server_iface):
         super(LayerDefinition, self).__init__(server_iface)
@@ -115,3 +112,56 @@ class LayerDefinition(QgsServerFilter):
 
             request.appendBody(qlr)
 
+        elif params.get('SERVICE', '').upper() == 'PROJECTDEFINITIONS':
+
+            request.clearHeaders()
+            request.setHeader('Content-type', 'text/plain')
+            request.clearBody()
+
+            layers = params.get('LAYERS')
+            if not layers:
+                request.appendBody('LAYERS parameter is missing.\n')
+                return
+
+            try:
+                layers = loads(layers)
+            except Exception as e:
+                QgsMessageLog.logMessage(str(e))
+
+            final_layers = []
+            for layer in layers:
+                query_string = ''
+                for key in layer.keys():
+                    query_string += key + '=' + layer[key] + '&'
+
+                if layer['type'] == 'vector':
+                    qgis_layer = QgsVectorLayer(
+                        query_string, layer['display'], layer['driver'])
+                else:
+                    qgis_layer = QgsRasterLayer(
+                        query_string, layer['display'], layer['driver'])
+
+                if not qgis_layer.isValid():
+                    request.appendBody(
+                        'One layer is invalid: %s.\n' % query_string)
+                    return
+
+                QgsMapLayerRegistry.instance().addMapLayer(qgis_layer)
+
+            project_path = tempfile.NamedTemporaryFile(
+                suffix='.qgs', delete=False)
+            project_path.close()
+            project_path = project_path.name
+            project = QgsProject.instance()
+            project.setFileName(project_path)
+
+            project.write()
+            project.clear()
+
+            generate_legend(final_layers, project_path)
+
+            with open(project_path, 'r') as qgis_project:
+                xml_data = qgis_project.read()
+                request.appendBody(xml_data)
+
+            remove(project_path)
