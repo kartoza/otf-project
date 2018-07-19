@@ -47,7 +47,7 @@ class MapComposition(QgsServerFilter):
         NAMES=Layer 1;Layer 2;Layer 3&
         REMOVEQML=true&
         OVERWRITE=true&
-        BASEMAP=[<base map url>, <base map name>]
+        BASEMAP='type=xyz&url=http://tile.osm.org/{z}/{x}/{y}.png?layers=osm;osm'
         """
         request = self.serverInterface().requestHandler()
         params = request.parameterMap()
@@ -149,10 +149,10 @@ class MapComposition(QgsServerFilter):
             if params.get('BASEMAP'):
                 # basemap is comprised of url and name with semicolon as separator
                 basemap = params.get('BASEMAP').split(';')
-                if len(basemap) > 1:
+                if len(basemap) == 2:
                     qgis_layer = QgsRasterLayer(basemap[0], basemap[1], 'wms')
                     if not qgis_layer.isValid():
-                        request.appendBody('%s cannot found' % basemap[1])
+                        request.appendBody('%s cannot be found' % basemap[1])
                         return
                     raster_layer.append(qgis_layer.id())
                     qgis_layers.append(qgis_layer)

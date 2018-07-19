@@ -14,6 +14,7 @@
   * NAMES, compulsory, it's a list of names, separated by a semicolon. It will be used for the legend. Items in this list should match layers in the FILES list.
   * OVERWRITE, optional, false by default. Boolean if we can overwrite the existing PROJECT above. Values can be '1', 'YES', 'TRUE', 'yes', 'true'.
   * REMOVEQML, optional, false by default. Boolean if we can remove the QML. The style is already in the QGS file. Values can be '1', 'YES', 'TRUE', 'yes', 'true'.
+  * BASEMAP, optional, None by default. it's a list of string comprised of a tile url and its service name, separated by a semicolon.
 
 
 Layers need to be stored on the server's filesystem. The project will be created at the specified path above, on the server's filesystem too.
