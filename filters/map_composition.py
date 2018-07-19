@@ -144,8 +144,15 @@ class MapComposition(QgsServerFilter):
                 style_manager = qgis_layer.styleManager()
                 style_manager.renameStyle('', 'default')
 
-                # Add layer to the registry
-                QgsMapLayerRegistry.instance().addMapLayer(qgis_layer)
+            # add basemap to the qgs project so it can be called later to create a thumbnail
+            qgis_layer = QgsRasterLayer('type=xyz&url=http://tile.osm.org/{z}/{x}/{y}.png?layers=osm', 'osm', 'wms')
+            if not qgis_layer.isValid():
+                print("osm not found")
+            raster_layer.append(qgis_layer.id())
+            qgis_layers.append(qgis_layer)
+
+            # Add layer to the registry
+            QgsMapLayerRegistry.instance().addMapLayers(qgis_layers)
 
             if len(vector_layers):
                 for layer_file in vector_layers:
