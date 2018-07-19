@@ -46,7 +46,8 @@ class MapComposition(QgsServerFilter):
         FILES=/path/1.shp;/path/2.shp;/path/3.asc&
         NAMES=Layer 1;Layer 2;Layer 3&
         REMOVEQML=true&
-        OVERWRITE=true
+        OVERWRITE=true&
+        BASEMAP=[<base map url>, <base map name>]
         """
         request = self.serverInterface().requestHandler()
         params = request.parameterMap()
@@ -144,12 +145,17 @@ class MapComposition(QgsServerFilter):
                 style_manager = qgis_layer.styleManager()
                 style_manager.renameStyle('', 'default')
 
-            # add basemap to the qgs project so it can be called later to create a thumbnail
-            qgis_layer = QgsRasterLayer('type=xyz&url=http://tile.osm.org/{z}/{x}/{y}.png?layers=osm', 'osm', 'wms')
-            if not qgis_layer.isValid():
-                print("osm not found")
-            raster_layer.append(qgis_layer.id())
-            qgis_layers.append(qgis_layer)
+            # add basemap to the qgs project for a background on a thumbnail
+            if params.get('BASEMAP'):
+                # basemap is comprised of url and name with semicolon as separator
+                basemap = params.get('BASEMAP').split(';')
+                if len(basemap) > 1:
+                    qgis_layer = QgsRasterLayer(basemap[0], basemap[1], 'wms')
+                    if not qgis_layer.isValid():
+                        request.appendBody('%s cannot found' % basemap[1])
+                        return
+                    raster_layer.append(qgis_layer.id())
+                    qgis_layers.append(qgis_layer)
 
             # Add layer to the registry
             QgsMapLayerRegistry.instance().addMapLayers(qgis_layers)
