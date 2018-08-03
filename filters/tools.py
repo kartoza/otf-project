@@ -16,7 +16,11 @@
 *                                                                         *
 ***************************************************************************
 """
+import urllib
+import urlparse
 import xml.etree.ElementTree as ET
+
+from qgis.core import QgsVectorLayer, QgsRasterLayer
 
 
 def generate_legend(layers, project):
@@ -47,3 +51,112 @@ def generate_legend(layers, project):
     xml_root = document.getroot()
     xml_root.append(xml_legend)
     document.write(project)
+
+
+def is_file_path(uri):
+    """True if this is a file path.
+
+    :param uri: The uri to check
+    :type uri: basestring
+
+    :return: Boolean value
+    :rtype: bool
+    """
+    try:
+        # light checking, if it starts with '/',
+        # then it is probably a file path
+        if uri.startswith('/'):
+            return True
+        # Check if it is a proper file:// uri.
+        # Need to unquote/decode it first
+        sanitized_uri = urllib.unquote(uri).decode('utf-8')
+        if sanitized_uri.startswith('file://'):
+            return True
+    except Exception:
+        return False
+
+
+def is_tile_path(uri):
+    """True if this is a tile path.
+
+    :param uri: The uri to check
+    :type uri: basestring
+
+    :return: Boolean value
+    :rtype: bool
+    """
+    try:
+        # Since this is a uri, unquote/decode it first
+        sanitized_uri = urllib.unquote(uri).decode('utf-8')
+        if sanitized_uri.startswith(('http://', 'https://')):
+            return True
+        # It might be in the form of query string
+        query_params = urlparse.parse_qs(sanitized_uri)
+        query_params_keys = [k.lower() for k in query_params.keys()]
+        if 'url' in query_params_keys:
+            return True
+    except Exception:
+        return False
+
+
+def validate_source_uri(source_uri):
+    """Validate a given source uri.
+
+    A source URI for QgsMapLayer is valid if it is a file path:
+    e.g. "/path/to/layer.shp"
+    or a WMS/Tile request
+    e.g. "type=xyz&url=http://tile.osm.org/{z}/{x}/{y}.png?layers=osm"
+
+    :param source_uri: A source URI
+    :type source_uri: basestring
+
+    :return: Boolean value
+    :rtype: bool
+    """
+    return is_file_path(source_uri) or is_tile_path(source_uri)
+
+
+def layer_from_source(source_uri, name):
+    """Return QgsMapLayer from a given source uri.
+
+    :param source_uri: A source URI
+    :type source_uri: basestring
+
+    :param name: Designated layer name
+    :type name: basestring
+
+    :return: QgsMapLayer
+    :rtype: qgis.core.QgsMapLayer
+    """
+    vector_extensions = ('shp', 'geojson')
+    raster_extensions = ('asc', 'tiff', 'tif', 'geotiff', 'geotif')
+
+    qgis_layer = None
+
+    if is_file_path(source_uri):
+
+        # sanitize source_uri
+        sanitized_uri = urllib.unquote(source_uri).decode('utf-8')
+        sanitized_uri.replace('file://', '')
+
+        if source_uri.endswith(vector_extensions):
+            qgis_layer = QgsVectorLayer(sanitized_uri, name, 'ogr')
+
+        elif source_uri.endswith(raster_extensions):
+            qgis_layer = QgsRasterLayer(sanitized_uri, name)
+
+    elif is_tile_path(source_uri):
+
+        # sanitize source_uri
+        sanitized_uri = urllib.unquote(source_uri).decode('utf-8')
+        # Check if it is only a url
+        if sanitized_uri.startswith(('http://', 'https://')):
+            # Then it is probably a tile xyz url
+            sanitized_uri = 'type=xyz&url={0}'.format(sanitized_uri)
+        # It might be in the form of query string
+        query_params = urlparse.parse_qs(sanitized_uri)
+        driver = query_params.get('driver', 'wms')
+
+        qgis_layer = QgsRasterLayer(sanitized_uri, name, driver)
+
+    return qgis_layer

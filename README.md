@@ -1,6 +1,6 @@
 # Create a QGIS project on the fly on the server
 
-* Supported raster formats : asc, tif, tiff
+* Supported raster formats : asc, tif, tiff, geotiff, geotif
 * Supported vector formats : shp, geojson
 
 **This project is still in development, the API may change.**
@@ -10,11 +10,12 @@
 * Parameters : 
   * SERVICE=MAPCOMPOSITION, compulsory
   * PROJECT, compulsory, path where the project will be written on the file system.
-  * FILES, compulsory, it's a list of files on the filesystem, separated by a semicolon.
+  * SOURCES, compulsory, it's a list of layer sources. It can be tile url or QGIS DataSource URI or files on the filesystem, separated by a semicolon.
+  	Especially for QGIS DataSource URI, it must be url quoted twice (first the url, second the whole datasource string).
+  * FILES, optional, legacy parameter, it's a list of files on the filesystem, separated by a semicolon. It is overriden by SOURCES.
   * NAMES, compulsory, it's a list of names, separated by a semicolon. It will be used for the legend. Items in this list should match layers in the FILES list.
   * OVERWRITE, optional, false by default. Boolean if we can overwrite the existing PROJECT above. Values can be '1', 'YES', 'TRUE', 'yes', 'true'.
   * REMOVEQML, optional, false by default. Boolean if we can remove the QML. The style is already in the QGS file. Values can be '1', 'YES', 'TRUE', 'yes', 'true'.
-  * BASEMAP, optional, None by default. it's a list of string comprised of a tile url and its service name, separated by a semicolon.
 
 
 Layers need to be stored on the server's filesystem. The project will be created at the specified path above, on the server's filesystem too.
@@ -38,6 +39,47 @@ http://localhost:81/qgis?
 SERVICE=WMS&
 MAP=/destination/project.qgs&
 REQUEST=GetCapabilities
+```
+
+* Example of using SOURCES with tile URI:
+
+```
+http://localhost:81/qgis?
+SERVICE=MAPCOMPOSITION&
+PROJECT=/destination/project.qgs&
+SOURCES=type%253Dxyz%2526url%253Dhttp%25253A%2F%2Fa.tile.osm.org%2F%25257Bz%25257D%2F%25257Bx%25257D%2F%25257By%25257D.png;/path/1.shp;/path/2.geojson;/path/3.asc&
+NAMES=Basemap;My layer 1;MyLayer 2;Layer 3&
+OVERWRITE=true
+```
+
+In the sample request above, note that the datasource: ```type%253Dxyz%2526url%253Dhttp%25253A%2F%2Fa.tile.osm.org%2F%25257Bz%25257D%2F%25257Bx%25257D%2F%25257By%25257D.png``` were urlquoted twice.
+The actual datasource is: ```type=xyz&url=http%3A//a.tile.osm.org/%7Bz%7D/%7Bx%7D/%7By%7D.png```
+Note that the actual url is: ```http://a.tile.osm.org/{z}/{x}/{y}.png```
+
+Thus in order to send the request, the url needs to be quoted first before it was inserted into datasource uri (to quote & symbol and = from url).
+Then, the datasource needs to be quoted again, because it was sent via GET requests url (to quote & symbol and = from datasource query params).
+
+As an example of sending your datasource of base layer:
+
+Quote your tile url:
+
+```
+>>> tile_url = 'http://a.tile.osm.org/{z}/{x}/{y}.png'
+>>> from requests.utils import quote
+>>> tile_url = quote(tile_url)
+```
+
+Then build your data source definition and quote it:
+
+```
+>>> definition = {
+...   'url': tile_url,
+...   'type': 'xyz'
+... }
+>>> datasource = '&'.join(['{key}={value}'.format(key=key,value=value) for key,value in definition.iteritems()])
+'url=http%3A//a.tile.osm.org/%7Bz%7D/%7Bx%7D/%7By%7D.png&type=xyz'
+>>> quoted_datasource = quote(datasource)
+'url%3Dhttp%253A//a.tile.osm.org/%257Bz%257D/%257Bx%257D/%257By%257D.png%26type%3Dxyz'
 ```
 
 ## Todo
