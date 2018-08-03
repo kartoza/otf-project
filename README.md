@@ -12,7 +12,7 @@
   * PROJECT, compulsory, path where the project will be written on the file system.
   * SOURCES, compulsory, it's a list of layer sources. It can be tile url or QGIS DataSource URI or files on the filesystem, separated by a semicolon.
   	Especially for QGIS DataSource URI, it must be url quoted twice (first the url, second the whole datasource string).
-  * FILES, optional, legacy parameter, it's a list of files on the filesystem, separated by a semicolon. It is overriden by SOURCES.
+  	Previously FILES.
   * NAMES, compulsory, it's a list of names, separated by a semicolon. It will be used for the legend. Items in this list should match layers in the FILES list.
   * OVERWRITE, optional, false by default. Boolean if we can overwrite the existing PROJECT above. Values can be '1', 'YES', 'TRUE', 'yes', 'true'.
   * REMOVEQML, optional, false by default. Boolean if we can remove the QML. The style is already in the QGS file. Values can be '1', 'YES', 'TRUE', 'yes', 'true'.
@@ -52,9 +52,9 @@ NAMES=Basemap;My layer 1;MyLayer 2;Layer 3&
 OVERWRITE=true
 ```
 
-In the sample request above, note that the datasource: ```type%253Dxyz%2526url%253Dhttp%25253A%2F%2Fa.tile.osm.org%2F%25257Bz%25257D%2F%25257Bx%25257D%2F%25257By%25257D.png``` were urlquoted twice.
-The actual datasource is: ```type=xyz&url=http%3A//a.tile.osm.org/%7Bz%7D/%7Bx%7D/%7By%7D.png```
-Note that the actual url is: ```http://a.tile.osm.org/{z}/{x}/{y}.png```
+In the sample request above, note that the datasource: `type%253Dxyz%2526url%253Dhttp%25253A%2F%2Fa.tile.osm.org%2F%25257Bz%25257D%2F%25257Bx%25257D%2F%25257By%25257D.png` were urlquoted twice.
+The actual datasource is: `type=xyz&url=http%3A//a.tile.osm.org/%7Bz%7D/%7Bx%7D/%7By%7D.png`
+Note that the actual url is: `http://a.tile.osm.org/{z}/{x}/{y}.png`
 
 Thus in order to send the request, the url needs to be quoted first before it was inserted into datasource uri (to quote & symbol and = from url).
 Then, the datasource needs to be quoted again, because it was sent via GET requests url (to quote & symbol and = from datasource query params).

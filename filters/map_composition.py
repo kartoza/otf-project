@@ -51,7 +51,7 @@ class MapComposition(QgsServerFilter):
         SOURCES=type=xyz&url=http://tile.osm.org/{z}/{x}/{y}.png?layers=osm;
             /path/1.shp;/path/2.shp;/path/3.asc&
         FILES={Legacy Name for Sources Parameter}
-        NAMES=Layer 1;Layer 2;Layer 3&
+        NAMES=basemap;Layer 1;Layer 2;Layer 3&
         REMOVEQML=true&
         OVERWRITE=true&
         """
@@ -90,11 +90,15 @@ class MapComposition(QgsServerFilter):
                 # Overwrite means create from scratch again
                 remove(project_path)
 
+            # Take datasource from SOURCES params
             sources_parameters = params.get('SOURCES')
-            # support legacy params: FILES
+
+            # In case SOURCES empty, maybe they are still using FILES.
+            # Support legacy params: FILES.
             if not sources_parameters:
                 sources_parameters = params.get('FILES')
 
+            # In case FILES also empty, raise error and exit.
             if not sources_parameters:
                 request.appendBody('SOURCES parameter is missing.\n')
                 return
