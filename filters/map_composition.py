@@ -135,7 +135,11 @@ class MapComposition(QgsServerFilter):
                 project.read()
 
             qml_files = []
+            # Loaded QGIS Layer
             qgis_layers = []
+            # QGIS Layer loaded by QGIS
+            project_qgis_layers = []
+            # Layer ids of vector and raster layers
             vector_layers = []
             raster_layers = []
 
@@ -169,19 +173,17 @@ class MapComposition(QgsServerFilter):
                 style_manager = qgis_layer.styleManager()
                 style_manager.renameStyle('', 'default')
 
+            map_registry = QgsMapLayerRegistry.instance()
             # Add layer to the registry
             if overwrite:
                 # Insert all new layers
-                QgsMapLayerRegistry.instance().addMapLayers(qgis_layers)
+                map_registry.addMapLayers(qgis_layers)
             else:
                 # Updating rules
                 # 1. Get existing layer by name
                 # 2. Compare source, if it is the same, don't update
                 # 3. If it is a new name, add it
                 # 4. If same name but different source, then update
-
-                map_registry = QgsMapLayerRegistry.instance()
-
                 for new_layer in qgis_layers:
                     # Get existing layer by name
                     current_layer = map_registry.mapLayersByName(
@@ -190,9 +192,11 @@ class MapComposition(QgsServerFilter):
                     # If it doesn't exists, add new layer
                     if not current_layer:
                         map_registry.addMapLayer(new_layer)
+                        project_qgis_layers.append(new_layer)
                     # If it is exists, compare source
                     else:
                         current_layer = current_layer[0]
+                        project_qgis_layers.append(current_layer)
 
                         # Same source, don't update
                         if current_layer.source() == new_layer.source():
@@ -214,6 +218,8 @@ class MapComposition(QgsServerFilter):
 
                             map_registry.removeMapLayer(current_layer.id())
                             map_registry.addMapLayer(new_layer)
+
+            qgis_layers = [l for l in map_registry.mapLayers().itervalues()]
 
             if len(vector_layers):
                 for layer_source in vector_layers:
