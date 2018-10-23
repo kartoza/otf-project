@@ -16,11 +16,12 @@
 *                                                                         *
 ***************************************************************************
 """
+import os
 import urllib
 import urlparse
 import xml.etree.ElementTree as ET
 
-from qgis.core import QgsVectorLayer, QgsRasterLayer
+from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsMapLayer
 
 
 def generate_legend(layers, project):
@@ -130,6 +131,7 @@ def layer_from_source(source_uri, name):
     """
     vector_extensions = ('shp', 'geojson')
     raster_extensions = ('asc', 'tiff', 'tif', 'geotiff', 'geotif')
+    qlr_extensions = ('qlr', )
 
     qgis_layer = None
 
@@ -144,6 +146,13 @@ def layer_from_source(source_uri, name):
 
         elif source_uri.endswith(raster_extensions):
             qgis_layer = QgsRasterLayer(sanitized_uri, name)
+
+        elif source_uri.endswith(qlr_extensions):
+
+            qgis_layer = QgsMapLayer.fromLayerDefinitionFile(sanitized_uri)
+            if qgis_layer:
+                qgis_layer = qgis_layer[0]
+                qgis_layer.setName(name)
 
     elif is_tile_path(source_uri):
 
